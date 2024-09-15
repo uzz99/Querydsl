@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import study.querydsl.entity.Member;
-import study.querydsl.entity.QMember;
 import study.querydsl.entity.Team;
 import static org.assertj.core.api.Assertions.assertThat;
+import static study.querydsl.entity.QMember.*;
 
 
 @SpringBootTest
@@ -20,8 +20,11 @@ public class QuerydslBasicTest {
     @Autowired
     EntityManager em;
 
+    JPAQueryFactory queryFactory;
+
     @BeforeEach
     public void before() {
+        queryFactory = new JPAQueryFactory(em);
 
         Team teamA = new Team("teamA");
         Team teamB = new Team("teamB");
@@ -43,7 +46,6 @@ public class QuerydslBasicTest {
 
     @Test
     public void startJPQL(){
-        //MEMBER1을 찾아라
         Member findMember = em.createQuery("select m from Member m where m.username = :username", Member.class)
                 .setParameter("username", "member1")
                 .getSingleResult();
@@ -51,20 +53,15 @@ public class QuerydslBasicTest {
         assertThat(findMember.getUsername()).isEqualTo("member1");
     }
 
-    //쿼리dsl 사용
     @Test
     public void startQuerydsl(){
-        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
-        QMember m = new QMember("m");//별칭 느낌
-
+        // 같은 테이블을 조인하는 경우엔 따로 선언해주기
         Member findMember = queryFactory
-                .select(m)
-                .from(m)
-                .where(m.username.eq("member1"))
+                .select(member)
+                .from(member)
+                .where(member.username.eq("member1"))
                 .fetchOne();
-        //파라미터 바인딩이 필요없다, prepare statement로 자동으로 처리(sql injection 방지)
-        // => .where(m.username.eq("member1"))
-        
+
         assertThat(findMember.getUsername()).isEqualTo("member1");
     }
 }
