@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import study.querydsl.dto.QMemberDto;
 import study.querydsl.dto.UserDto;
 import study.querydsl.entity.Member;
 import study.querydsl.entity.QMember;
@@ -58,10 +59,10 @@ public class QuerydslBasicTest {
         em.persist(member2);
         em.persist(member3);
         em.persist(member4);
-        }
+    }
 
     @Test
-    public void startJPQL(){
+    public void startJPQL() {
         Member findMember = em.createQuery("select m from Member m where m.username = :username", Member.class)
                 .setParameter("username", "member1")
                 .getSingleResult();
@@ -70,7 +71,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void startQuerydsl(){
+    public void startQuerydsl() {
         // 같은 테이블을 조인하는 경우엔 따로 선언해주기
         Member findMember = queryFactory
                 .select(member)
@@ -82,7 +83,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void search(){
+    public void search() {
         Member findMember = queryFactory
                 .selectFrom(member)
                 .where(member.username.eq("member1")
@@ -93,7 +94,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void searchAndParam(){
+    public void searchAndParam() {
         Member findMember = queryFactory
                 .selectFrom(member)
                 .where(
@@ -135,7 +136,7 @@ public class QuerydslBasicTest {
      * 3. 이름이 없으면 마지막에 출력
      */
     @Test
-    public void sort(){
+    public void sort() {
         em.persist(new Member(null, 100));
         em.persist(new Member("member5", 100));
         em.persist(new Member("member6", 100));
@@ -154,7 +155,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void paging1(){
+    public void paging1() {
         List<Member> result = queryFactory
                 .selectFrom(member)
                 .orderBy(member.age.desc())
@@ -164,8 +165,9 @@ public class QuerydslBasicTest {
 
         assertThat(result.size()).isEqualTo(2);
     }
+
     @Test
-    public void paging2(){
+    public void paging2() {
         QueryResults<Member> queryResults = queryFactory
                 .selectFrom(member)
                 .orderBy(member.age.desc())
@@ -207,9 +209,9 @@ public class QuerydslBasicTest {
      * @throws Exception
      */
 
-    
+
     @Test
-    public void group() throws Exception{
+    public void group() throws Exception {
         List<Tuple> result = queryFactory
                 .select(team.name, member.age.avg())
                 .from(member)
@@ -250,7 +252,7 @@ public class QuerydslBasicTest {
      */
     // 세타조인은 외부 조인이 불가능..
     @Test
-    public void theta_join(){
+    public void theta_join() {
         em.persist(new Member("teamA"));
         em.persist(new Member("teamB"));
         em.persist(new Member("teamC"));
@@ -280,7 +282,7 @@ public class QuerydslBasicTest {
                 .on(team.name.eq("teamA"))
                 .fetch();
 
-        for(Tuple tuple : result){
+        for (Tuple tuple : result) {
             System.out.println("tuple = " + tuple);
         }
     }
@@ -309,6 +311,7 @@ public class QuerydslBasicTest {
 
     @PersistenceUnit
     EntityManagerFactory emf;
+
     @Test
     public void fetchJoinNo() {
         // 영속성 컨텍스트 정리
@@ -343,15 +346,15 @@ public class QuerydslBasicTest {
      * 나이가 가장 많은 회원 조회
      */
     @Test
-    public void subQuery(){
+    public void subQuery() {
         QMember memberSub = new QMember("memberSub");
 
         List<Member> result = queryFactory
-                .select(memberSub)
+                .selectFrom(member)
                 .where(member.age.eq(
                         JPAExpressions
-                        .select(memberSub.age.max())
-                        .from(memberSub)
+                                .select(memberSub.age.max())
+                                .from(memberSub)
                 ))
                 .fetch();
 
@@ -363,11 +366,11 @@ public class QuerydslBasicTest {
      * 나이가 평균 이상인 회원 조회
      */
     @Test
-    public void subQueryGoe(){
+    public void subQueryGoe() {
         QMember memberSub = new QMember("memberSub");
 
         List<Member> result = queryFactory
-                .select(memberSub)
+                .selectFrom(member)
                 .where(member.age.goe(
                         JPAExpressions
                                 .select(memberSub.age.avg())
@@ -380,7 +383,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void subQueryIn(){
+    public void subQueryIn() {
         QMember memberSub = new QMember("memberSub");
 
         List<Member> result = queryFactory
@@ -399,7 +402,7 @@ public class QuerydslBasicTest {
 
     //select절 서브쿼리
     @Test
-    public void selectSubquery(){
+    public void selectSubquery() {
         QMember memberSub = new QMember("memberSub");
 
         List<Tuple> fetch = queryFactory
@@ -430,13 +433,13 @@ public class QuerydslBasicTest {
                 .from(member)
                 .fetch();
 
-        for (String s : result){
+        for (String s : result) {
             System.out.println("s = " + s);
         }
     }
 
     @Test
-    public void complexCase(){
+    public void complexCase() {
         List<String> result = queryFactory.select(new CaseBuilder()
                         .when(member.age.between(0, 20)).then("0~20살")
                         .when(member.age.between(0, 20)).then("21~30살")
@@ -444,7 +447,7 @@ public class QuerydslBasicTest {
                 .from(member)
                 .fetch();
 
-        for (String s : result){
+        for (String s : result) {
             System.out.println("s = " + s);
         }
     }
@@ -456,20 +459,20 @@ public class QuerydslBasicTest {
                 .from(member)
                 .fetch();
 
-        for (Tuple tuple : result){
+        for (Tuple tuple : result) {
             System.out.println("tuple = " + tuple);
         }
     }
 
     @Test
-    public void concat(){
+    public void concat() {
         List<String> result = queryFactory
                 .select(member.username.concat("_").concat(member.age.stringValue()))
                 .from(member)
                 .where(member.username.eq("member1"))
                 .fetch();
 
-        for (String s : result){
+        for (String s : result) {
             System.out.println("s = " + s);
         }
     }
@@ -481,7 +484,7 @@ public class QuerydslBasicTest {
                 .from(member)
                 .fetch();
 
-        for(Tuple tuple : result){
+        for (Tuple tuple : result) {
             String username = tuple.get(member.username);
             Integer age = tuple.get(member.age);
             System.out.println("username = " + username);
@@ -490,58 +493,58 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void findDtoByJPQL(){
+    public void findDtoByJPQL() {
         List<MemberDto> result = em.createQuery(
-                    "select new study.querydsl.dto.MemberDto(m.username, m.age) " +
-                            "from Member m", MemberDto.class)
-            .getResultList();
+                        "select new study.querydsl.dto.MemberDto(m.username, m.age) " +
+                                "from Member m", MemberDto.class)
+                .getResultList();
     }
 
     //querydsl 적용
     //1)
     @Test
-    public void findDtoBySetter(){
+    public void findDtoBySetter() {
         //bean: getter, setter
         List<MemberDto> result = queryFactory
                 .select(Projections.bean(MemberDto.class, member.username, member.age))
                 .from(member)
                 .fetch();
 
-        for(MemberDto memberDto : result){
+        for (MemberDto memberDto : result) {
             System.out.println("memberDto = " + memberDto);
         }
     }
 
     //2)
     @Test
-    public void findDtoByField(){
+    public void findDtoByField() {
         //fields: getter, setter 없어도 바로 필드에 값 넣기 가능
         List<MemberDto> result = queryFactory
                 .select(Projections.fields(MemberDto.class, member.username, member.age))
                 .from(member)
                 .fetch();
 
-        for(MemberDto memberDto : result){
+        for (MemberDto memberDto : result) {
             System.out.println("memberDto = " + memberDto);
         }
     }
 
     //3)
     @Test
-    public void findDtoByConstructor(){
+    public void findDtoByConstructor() {
         //fields: getter, setter 없어도 바로 필드에 값 넣기 가능
         List<MemberDto> result = queryFactory
                 .select(Projections.constructor(MemberDto.class, member.username, member.age))
                 .from(member)
                 .fetch();
 
-        for(MemberDto memberDto : result){
+        for (MemberDto memberDto : result) {
             System.out.println("memberDto = " + memberDto);
         }
     }
 
     @Test
-    public void findUserDto(){
+    public void findUserDto() {
         QMember memberSub = new QMember("memberSub");
         List<UserDto> result = queryFactory
                 .select(Projections.fields(UserDto.class,
@@ -555,20 +558,34 @@ public class QuerydslBasicTest {
                 .from(member)
                 .fetch();
 
-        for(UserDto userDto : result){
+        for (UserDto userDto : result) {
             System.out.println("userDto = " + userDto);
         }
     }
 
     @Test
-    public void findUserDtoByConstructor(){
+    public void findUserDtoByConstructor() {
         List<UserDto> result = queryFactory
                 .select(Projections.constructor(UserDto.class, member.username, member.age))
                 .from(member)
                 .fetch();
 
-        for(UserDto userDto : result){
+        for (UserDto userDto : result) {
             System.out.println("userDto = " + userDto);
         }
     }
+
+    // constructor는 runtime 때 에러 발견 가능, QMemberDto이므로 컴파일 떼 에러 발견 가능
+    @Test
+    public void findDtoQueryProjection() {
+        List<MemberDto> result = queryFactory
+                .select(new QMemberDto(member.username, member.age))
+                .from(member)
+                .fetch();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
 }
