@@ -24,7 +24,7 @@ public class Member {
         this(username, 0);
     }
     public Member(String username, int age) {
-        this(username, 0, null);
+        this(username, age, null);
     }
 
     public Member(String username, int age, Team team) {
