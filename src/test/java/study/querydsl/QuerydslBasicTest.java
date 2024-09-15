@@ -651,4 +651,44 @@ public class QuerydslBasicTest {
     private BooleanExpression allEq(String usernameCond, Integer ageCond) {
         return usernameEq(usernameCond).and(ageEq(ageCond));
     }
+
+    @Test
+    public void bulkUpdate(){
+        // member1 = 10 -> DB: 비회원
+        // member2 = 20 -> DB: 비회원
+        // member3 = 30 -> DB: member3
+        // member4 = 40 -> DB: member4
+
+        long count = queryFactory
+                .update(member)
+                .set(member.username, "비회원")
+                .where(member.age.lt(28))
+                .execute();
+
+        // member1 = 10 -> DB: 비회원
+        // member2 = 20 -> DB: 비회원
+        // member3 = 30 -> DB: member3
+        // member4 = 40 -> DB: member4
+        // 쿼리 실행 후에는 영속성컨텍스트에 그대로 남아있음(db와 상태 불일치) => 영속성 컨텍스트가 우선권을 가짐
+        em.flush();
+        em.clear();
+        // => 영속성 컨텍스트 초기화
+
+    }
+
+    @Test
+    public void bulkAdd(){
+        long count = queryFactory
+                .update(member)
+                .set(member.age, member.age.add(1))
+                .execute();
+    }
+
+    @Test
+    public void bulkDelete(){
+        long count = queryFactory
+                .delete(member)
+                .where(member.age.gt(18))
+                .execute();
+    }
 }
