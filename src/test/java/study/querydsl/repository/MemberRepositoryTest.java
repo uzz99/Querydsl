@@ -26,9 +26,6 @@ public class MemberRepositoryTest {
     @Autowired
     MemberRepository memberRepository;
 
-    @Autowired
-    MemberRepositoryCustom memberRepositoryCustom;
-
     @Test
     public void basicTest() {
         Member member = new Member("member1", 10);
@@ -70,7 +67,7 @@ public class MemberRepositoryTest {
         condition.setAgeLoe(40);
         condition.setTeamName("teamB");
 
-        List<MemberTeamDto> result = memberRepositoryCustom.search(condition);
+        List<MemberTeamDto> result = memberRepository.search(condition);
 
         assertThat(result).extracting("username").containsExactly("member4");
 
@@ -99,7 +96,7 @@ public class MemberRepositoryTest {
         MemberSearchCondition condition = new MemberSearchCondition();
         PageRequest pageRequest = PageRequest.of(0, 3);
 
-        Page<MemberTeamDto> result = memberRepositoryCustom.searchPageSimple(condition, pageRequest);
+        Page<MemberTeamDto> result = memberRepository.searchPageSimple(condition, pageRequest);
 
         assertThat(result.getSize()).isEqualTo(3);
         assertThat(result.getContent()).extracting("username").containsExactly("member1","member2","member3");
