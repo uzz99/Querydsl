@@ -746,7 +746,8 @@ public class QuerydslBasicTest {
         condition.setAgeLoe(40);
         condition.setTeamName("teamB");
         // 동적쿼리 짤 땐, 조건이 있는걸 권장함
-        List<MemberTeamDto> result = memberJpaRepository.searchByBuilder(condition);
+//        List<MemberTeamDto> result = memberJpaRepository.searchByBuilder(condition);
+        List<MemberTeamDto> result = memberJpaRepository.search(condition);
 
         assertThat(result).extracting("username").containsExactly("member4");
 
