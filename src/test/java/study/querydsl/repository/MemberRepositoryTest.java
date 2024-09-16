@@ -104,6 +104,7 @@ public class MemberRepositoryTest {
 
     }
 
+
     @Test
     public void querydslPredicateExecutor() {
         // 조인이 어려움
